@@ -11,13 +11,13 @@
         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainViewModel />
     </Design.DataContext>
-    <StackPanel>
+    <Grid ColumnDefinitions="*" RowDefinitions="*,Auto,Auto,Auto,*">
         <ScrollViewer>
             <ListBox ItemsSource="{Binding Devices}"
                      SelectedItem="{Binding SelectedDevice}"
                      DisplayMemberBinding="{Binding Name}"/>
         </ScrollViewer>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Carica dispositivi"
                     Command="{Binding LoadDevicesCommand}"/>
 
@@ -29,20 +29,20 @@
                     Command="{Binding DisconnectCommand}"/>
         </StackPanel>
 
-        <TextBlock Text="{Binding IsConnected}" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="2" Text="{Binding IsConnected}" HorizontalAlignment="Center"/>
 
-        <Grid ColumnDefinitions="*,*" RowDefinitions="*">
+        <Grid Grid.Row="3" ColumnDefinitions="*,*" RowDefinitions="*">
 
             <Button Content="1" Grid.Column="1"
                     Command="{Binding SendOneCommand}"
-                    IsEnabled="{Binding IsConnected}" HorizontalAlignment="Left"/>
+                    IsEnabled="{Binding IsConnected}" Height="80" Width="80" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
 
             <Button Content="0"
                     Command="{Binding SendZeroCommand}"
-                    IsEnabled="{Binding IsConnected}" HorizontalAlignment="Right"/>
+                    IsEnabled="{Binding IsConnected}" Height="80" Width="80" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
 
         </Grid>
-        <TextBlock Text="{Binding LastError}" Foreground="Red"/>
+        <TextBlock Grid.Row="4" Text="{Binding LastError}" Foreground="Red" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
-    </StackPanel>
+    </Grid>
 </UserControl>

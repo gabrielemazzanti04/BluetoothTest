@@ -20,35 +20,27 @@ namespace BluetoothTest.Android
 
         public async Task<bool> ConnectAsync(string address)
         {
-            try
-            {
-                var manager = (BluetoothManager)Application.Context
-                    .GetSystemService(Context.BluetoothService)!;
+            var manager = (BluetoothManager)Application.Context
+                .GetSystemService(Context.BluetoothService)!;
 
-                var adapter = manager.Adapter;
+            var adapter = manager.Adapter;
 
-                adapter.CancelDiscovery();
+            adapter.CancelDiscovery();
 
-                var device = adapter.GetRemoteDevice(address);
+            var device = adapter.GetRemoteDevice(address);
 
-                var uuid = Java.Util.UUID.FromString(
-                    "00001101-0000-1000-8000-00805F9B34FB");
+            var uuid = Java.Util.UUID.FromString(
+                "00001101-0000-1000-8000-00805F9B34FB");
 
-                _socket = device.CreateRfcommSocketToServiceRecord(uuid);
+            _socket = device.CreateRfcommSocketToServiceRecord(uuid);
 
-                await _socket.ConnectAsync();
+            await _socket.ConnectAsync();
 
-                if (!_socket.IsConnected)
-                    return false;
-
-                StartReading();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("CONNECT ERROR: " + ex);
+            if (!_socket.IsConnected)
                 return false;
-            }
+
+            StartReading();
+            return true;
         }
 
         public async Task SendAsync(byte[] data)
