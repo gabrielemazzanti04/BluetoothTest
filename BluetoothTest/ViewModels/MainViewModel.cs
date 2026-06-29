@@ -27,25 +27,6 @@ namespace BluetoothTest.ViewModels
             LoadDevices();
         }
 
-        //[RelayCommand]
-        //public async Task TestBluetooth()
-        //{
-        //    try
-        //    {
-        //        var devices = _bluetoothService.GetPairedDevices();
-
-        //        foreach (var d in devices)
-        //        {
-        //            Debug.WriteLine($"{d.Name} - {d.Address}");
-        //        }
-
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Debug.WriteLine($"Error connecting to Bluetooth device: {ex.Message}");
-        //    }
-        //}
         [RelayCommand]
         public async Task LoadDevices()
         {

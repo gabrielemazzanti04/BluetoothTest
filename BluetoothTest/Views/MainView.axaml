@@ -1,45 +1,48 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                xmlns:vm="using:BluetoothTest.ViewModels"
-                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-                x:Class="BluetoothTest.Views.MainView"
-                x:DataType="vm:MainViewModel">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BluetoothTest.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="BluetoothTest.Views.MainView"
+             x:DataType="vm:MainViewModel">
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
-to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainViewModel />
     </Design.DataContext>
     <StackPanel>
-        <TextBlock Text="{Binding LastError}" Foreground="Red"/>
-        <ComboBox ItemsSource="{Binding Devices}"
-                  SelectedItem="{Binding SelectedDevice}"
-                  DisplayMemberBinding="{Binding Name}"/>
+        <ScrollViewer>
+            <ListBox ItemsSource="{Binding Devices}"
+                     SelectedItem="{Binding SelectedDevice}"
+                     DisplayMemberBinding="{Binding Name}"/>
+        </ScrollViewer>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Carica dispositivi"
+                    Command="{Binding LoadDevicesCommand}"/>
 
-        <Button Content="Carica dispositivi"
-                Command="{Binding LoadDevicesCommand}"/>
+            <Button Content="Connetti"
+                    Command="{Binding ConnectCommand}"
+                    IsEnabled="{Binding SelectedDevice}"/>
 
-        <Button Content="Connetti"
-                Command="{Binding ConnectCommand}"
-                IsEnabled="{Binding SelectedDevice}"/>
+            <Button Content="Disconnetti"
+                    Command="{Binding DisconnectCommand}"/>
+        </StackPanel>
 
-        <Button Content="Disconnetti"
-                Command="{Binding DisconnectCommand}"/>
+        <TextBlock Text="{Binding IsConnected}" HorizontalAlignment="Center"/>
 
-        <TextBlock Text="{Binding IsConnected}" />
+        <Grid ColumnDefinitions="*,*" RowDefinitions="*">
 
-        <StackPanel Orientation="Horizontal">
-
-            <Button Content="1"
+            <Button Content="1" Grid.Column="1"
                     Command="{Binding SendOneCommand}"
-                    IsEnabled="{Binding IsConnected}"/>
+                    IsEnabled="{Binding IsConnected}" HorizontalAlignment="Left"/>
 
             <Button Content="0"
                     Command="{Binding SendZeroCommand}"
-                    IsEnabled="{Binding IsConnected}"/>
+                    IsEnabled="{Binding IsConnected}" HorizontalAlignment="Right"/>
 
-        </StackPanel>
+        </Grid>
+        <TextBlock Text="{Binding LastError}" Foreground="Red"/>
 
     </StackPanel>
 </UserControl>
