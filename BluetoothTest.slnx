@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="BluetoothTest.Android/BluetoothTest.Android.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="BluetoothTest.Browser/BluetoothTest.Browser.csproj" />
+  <Project Path="BluetoothTest.Desktop/BluetoothTest.Desktop.csproj" />
+  <Project Path="BluetoothTest.iOS/BluetoothTest.iOS.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="BluetoothTest/BluetoothTest.csproj" />
+</Solution>
