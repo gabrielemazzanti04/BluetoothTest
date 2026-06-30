@@ -17,5 +17,6 @@ namespace BluetoothTest
         bool IsConnected { get; }
 
         event EventHandler? Disconnected;
+        event EventHandler<byte[]>? DataReceived;
     }
 }

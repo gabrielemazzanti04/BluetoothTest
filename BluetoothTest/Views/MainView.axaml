@@ -22,7 +22,7 @@
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
         <Style Selector="Button.send:disabled /template/ ContentPresenter">
-            <Setter Property="Opacity" Value="0.25"/>
+            <Setter Property="Opacity" Value="0.2"/>
         </Style>
         <Style Selector="Button.reconnect">
             <Setter Property="Background" Value="#252540"/>
@@ -47,32 +47,23 @@
             <Grid ColumnDefinitions="*,Auto">
                 <StackPanel>
                     <TextBlock Text="Controllo Luci"
-                               FontSize="22"
-                               FontWeight="Bold"
-                               Foreground="White"/>
+                               FontSize="22" FontWeight="Bold" Foreground="White"/>
                     <TextBlock Text="ESP32-Luce"
-                               FontSize="12"
-                               Foreground="#5050A0"
-                               Margin="0,2,0,0"/>
+                               FontSize="12" Foreground="#5050A0" Margin="0,2,0,0"/>
                 </StackPanel>
 
-                <!-- Status pill -->
-                <Border Grid.Column="1" CornerRadius="20" Padding="14,7" VerticalAlignment="Center">
-                    <!-- Connesso -->
-                    <Border.IsVisible>
-                        <Binding Path="IsConnected"/>
-                    </Border.IsVisible>
-                    <Border.Background>
-                        <SolidColorBrush Color="#0D2A1A"/>
-                    </Border.Background>
+                <!-- Connesso -->
+                <Border Grid.Column="1" CornerRadius="20" Padding="14,7" VerticalAlignment="Center"
+                        Background="#0D2A1A" IsVisible="{Binding IsConnected}">
                     <StackPanel Orientation="Horizontal" Spacing="7">
                         <Ellipse Width="8" Height="8" Fill="#22C55E" VerticalAlignment="Center"/>
-                        <TextBlock Text="Connesso" FontSize="12" Foreground="#22C55E" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Text="Connesso" FontSize="12" Foreground="#22C55E"
+                                   FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
+                <!-- Non connesso -->
                 <Border Grid.Column="1" CornerRadius="20" Padding="14,7" VerticalAlignment="Center"
-                        Background="#1A1A2E"
-                        IsVisible="{Binding !IsConnected}">
+                        Background="#1A1A2E" IsVisible="{Binding !IsConnected}">
                     <StackPanel Orientation="Horizontal" Spacing="7">
                         <Ellipse Width="8" Height="8" Fill="#505080" VerticalAlignment="Center"/>
                         <TextBlock Text="Non connesso" FontSize="12" Foreground="#505080" VerticalAlignment="Center"/>
@@ -83,65 +74,126 @@
 
         <!-- Main controls -->
         <Grid Grid.Row="1" RowDefinitions="*,Auto,*">
-
-            <!-- Bottoni ON/OFF -->
-            <StackPanel Grid.Row="1"
-                        HorizontalAlignment="Center"
-                        Spacing="32">
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Spacing="28">
 
                 <TextBlock Text="CONTROLLA LA LUCE"
-                           FontSize="11"
-                           FontWeight="SemiBold"
-                           Foreground="#404060"
-                           LetterSpacing="2"
-                           HorizontalAlignment="Center"/>
+                           FontSize="11" FontWeight="SemiBold" Foreground="#404060"
+                           LetterSpacing="2" HorizontalAlignment="Center"/>
 
                 <Grid ColumnDefinitions="Auto,40,Auto">
+
                     <!-- OFF -->
-                    <Button Classes="send"
-                            IsEnabled="{Binding IsConnected}"
-                            Command="{Binding SendZeroCommand}"
-                            Background="#0E1E35"
-                            ToolTip.Tip="Spegni">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
-                            <TextBlock Text="⏻" FontSize="38" Foreground="#2D5A8E" HorizontalAlignment="Center"/>
-                            <TextBlock Text="OFF" FontSize="13" FontWeight="Bold" Foreground="#2D5A8E" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Spacing="10" HorizontalAlignment="Center">
+                        <!-- bordo attivo -->
+                        <Border CornerRadius="27" Padding="3"
+                                IsVisible="{Binding LightIsOff}">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                    <GradientStop Color="#1E4080" Offset="0"/>
+                                    <GradientStop Color="#2D5A8E" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Classes="send"
+                                    IsEnabled="{Binding IsConnected}"
+                                    Command="{Binding SendZeroCommand}"
+                                    Background="#0E1E35">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                                    <TextBlock Text="⏻" FontSize="38" Foreground="#60A5FA" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="OFF" FontSize="13" FontWeight="Bold" Foreground="#60A5FA" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Border>
+                        <!-- senza bordo -->
+                        <Button Classes="send"
+                                IsVisible="{Binding !LightIsOff}"
+                                IsEnabled="{Binding IsConnected}"
+                                Command="{Binding SendZeroCommand}"
+                                Background="#0E1E35">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                                <TextBlock Text="⏻" FontSize="38" Foreground="#2D5A8E" HorizontalAlignment="Center"/>
+                                <TextBlock Text="OFF" FontSize="13" FontWeight="Bold" Foreground="#2D5A8E" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <!-- pallino indicatore -->
+                        <Ellipse Width="8" Height="8" HorizontalAlignment="Center"
+                                 Fill="#60A5FA" IsVisible="{Binding LightIsOff}"/>
+                        <Ellipse Width="8" Height="8" HorizontalAlignment="Center"
+                                 Fill="Transparent" IsVisible="{Binding !LightIsOff}"/>
+                    </StackPanel>
 
                     <!-- Separatore -->
                     <Rectangle Grid.Column="1" Width="1" Fill="#252540" VerticalAlignment="Stretch" Margin="0,20"/>
 
                     <!-- ON -->
-                    <Button Classes="send"
-                            Grid.Column="2"
-                            IsEnabled="{Binding IsConnected}"
-                            Command="{Binding SendOneCommand}"
-                            Background="#1A3520"
-                            ToolTip.Tip="Accendi">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
-                            <TextBlock Text="⏻" FontSize="38" Foreground="#22C55E" HorizontalAlignment="Center"/>
-                            <TextBlock Text="ON" FontSize="13" FontWeight="Bold" Foreground="#22C55E" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Grid.Column="2" Spacing="10" HorizontalAlignment="Center">
+                        <!-- bordo attivo -->
+                        <Border CornerRadius="27" Padding="3"
+                                IsVisible="{Binding LightIsOn}">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                    <GradientStop Color="#166534" Offset="0"/>
+                                    <GradientStop Color="#22C55E" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Classes="send"
+                                    IsEnabled="{Binding IsConnected}"
+                                    Command="{Binding SendOneCommand}"
+                                    Background="#1A3520">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                                    <TextBlock Text="⏻" FontSize="38" Foreground="#4ADE80" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="ON" FontSize="13" FontWeight="Bold" Foreground="#4ADE80" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Border>
+                        <!-- senza bordo -->
+                        <Button Classes="send"
+                                IsVisible="{Binding !LightIsOn}"
+                                IsEnabled="{Binding IsConnected}"
+                                Command="{Binding SendOneCommand}"
+                                Background="#1A3520">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                                <TextBlock Text="⏻" FontSize="38" Foreground="#22C55E" HorizontalAlignment="Center"/>
+                                <TextBlock Text="ON" FontSize="13" FontWeight="Bold" Foreground="#22C55E" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Ellipse Width="8" Height="8" HorizontalAlignment="Center"
+                                 Fill="#4ADE80" IsVisible="{Binding LightIsOn}"/>
+                        <Ellipse Width="8" Height="8" HorizontalAlignment="Center"
+                                 Fill="Transparent" IsVisible="{Binding !LightIsOn}"/>
+                    </StackPanel>
+
                 </Grid>
+
+                <!-- Stato sconosciuto -->
+                <TextBlock Text="In attesa dello stato..."
+                           FontSize="12" Foreground="#404060"
+                           HorizontalAlignment="Center"
+                           IsVisible="{Binding IsConnected}">
+                    <TextBlock.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="IsConnected"/>
+                            <Binding Path="LightIsOn" Converter="{x:Static BoolConverters.Not}"/>
+                            <Binding Path="LightIsOff" Converter="{x:Static BoolConverters.Not}"/>
+                        </MultiBinding>
+                    </TextBlock.IsVisible>
+                </TextBlock>
+
             </StackPanel>
         </Grid>
 
         <!-- Reconnect button -->
-        <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,0,0,20" Spacing="10">
+        <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,0,0,20">
             <Button Classes="reconnect"
                     Content="↻  Riconnetti"
-                    Command="{Binding LoadDevicesCommand}"
-                    HorizontalAlignment="Center"/>
+                    Command="{Binding LoadDevicesCommand}"/>
         </StackPanel>
 
         <!-- Error area -->
         <Border Grid.Row="3" Margin="20,0,20,24"
                 IsVisible="{Binding LastError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <Border Background="#2D0A0A" CornerRadius="12" Padding="16,12">
+            <Border Background="#1A1A2E" CornerRadius="12" Padding="16,12">
                 <TextBlock Text="{Binding LastError}"
-                           Foreground="#F87171"
+                           Foreground="#9090C0"
                            FontSize="12"
                            TextWrapping="Wrap"
                            HorizontalAlignment="Center"/>
