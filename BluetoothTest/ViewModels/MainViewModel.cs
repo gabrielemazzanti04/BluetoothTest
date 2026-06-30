@@ -12,20 +12,22 @@ namespace BluetoothTest.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
-        // Nome esatto del dispositivo a cui connettersi automaticamente (lascia vuoto per disabilitare)
-        private const string AutoConnectDeviceName = "ESP32-Luce";
+        private const string KeyLastDeviceAddress = "last_device_address";
 
         private readonly IBluetoothService _bluetooth;
-        private CancellationTokenSource? _reconnectCts;
+        private readonly ISettingsService  _settings;
+        private CancellationTokenSource?   _reconnectCts;
 
         public ObservableCollection<BluetoothDeviceInfo> Devices { get; } = new();
 
         [ObservableProperty] private BluetoothDeviceInfo? selectedDevice;
-        [ObservableProperty] private string? lastError = "";
-        [ObservableProperty] private bool isConnected;
+        [ObservableProperty] private string?              lastError = "";
+        [ObservableProperty] private bool                 isConnected;
+        [ObservableProperty] private bool?                lightState;
+        [ObservableProperty] private bool                 isDevicePickerOpen;
 
-        // true = accesa, false = spenta, null = stato sconosciuto
-        [ObservableProperty] private bool? lightState;
+        // nome mostrato nell'header ("Nessun dispositivo" se non ancora scelto)
+        [ObservableProperty] private string targetDeviceName = "Nessun dispositivo";
 
         public bool LightIsOn  => LightState == true;
         public bool LightIsOff => LightState == false;
@@ -36,34 +38,39 @@ namespace BluetoothTest.ViewModels
             OnPropertyChanged(nameof(LightIsOff));
         }
 
-        public MainViewModel(IBluetoothService bluetoothService)
+        public MainViewModel(IBluetoothService bluetoothService, ISettingsService settingsService)
         {
             _bluetooth = bluetoothService;
-            _bluetooth.Disconnected   += OnBluetoothDisconnected;
-            _bluetooth.DataReceived   += OnDataReceived;
+            _settings  = settingsService;
+
+            _bluetooth.Disconnected += OnBluetoothDisconnected;
+            _bluetooth.DataReceived += OnDataReceived;
+
             LoadDevices();
         }
 
-        private void OnBluetoothDisconnected(object? sender, EventArgs e)
+        // ── Gestione dispositivo target ──────────────────────────────────────
+
+        [RelayCommand]
+        public void ToggleDevicePicker() => IsDevicePickerOpen = !IsDevicePickerOpen;
+
+        [RelayCommand]
+        public async Task SelectDevice(BluetoothDeviceInfo device)
         {
-            IsConnected = false;
-            LightState  = null;
-            LastError   = "Dispositivo disconnesso.";
-            StartAutoReconnect();
+            SelectedDevice     = device;
+            TargetDeviceName   = device.Name;
+            IsDevicePickerOpen = false;
+
+            _settings.Set(KeyLastDeviceAddress, device.Address);
+
+            // disconnette l'eventuale sessione corrente e si riconnette al nuovo dispositivo
+            if (IsConnected)
+                await _bluetooth.DisconnectAsync();
+
+            await Connect();
         }
 
-        private void OnDataReceived(object? sender, byte[] data)
-        {
-            // L'ESP32 risponde "OK:0\n" o "OK:1\n"
-            var msg = Encoding.UTF8.GetString(data).Trim();
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (msg.Contains("OK:1"))      { LightState = true;  LastError = ""; }
-                else if (msg.Contains("OK:0")) { LightState = false; LastError = ""; }
-            });
-        }
-
-        // ── Comandi ─────────────────────────────────────────────────────────
+        // ── Comandi principali ───────────────────────────────────────────────
 
         [RelayCommand]
         public async Task LoadDevices()
@@ -77,14 +84,24 @@ namespace BluetoothTest.ViewModels
                 foreach (var d in devices)
                     Devices.Add(d);
 
-                var target = !string.IsNullOrEmpty(AutoConnectDeviceName)
-                    ? Devices.FirstOrDefault(d => d.Name.Contains(AutoConnectDeviceName, StringComparison.OrdinalIgnoreCase))
+                // prova a trovare l'ultimo dispositivo usato
+                var savedAddress = _settings.Get(KeyLastDeviceAddress);
+                var target = savedAddress != null
+                    ? Devices.FirstOrDefault(d => d.Address == savedAddress)
                     : null;
 
-                SelectedDevice = target ?? Devices.FirstOrDefault();
-
                 if (target != null)
+                {
+                    SelectedDevice   = target;
+                    TargetDeviceName = target.Name;
                     await Connect();
+                }
+                else
+                {
+                    // nessun dispositivo salvato: apre il picker
+                    IsDevicePickerOpen = true;
+                    TargetDeviceName   = "Nessun dispositivo";
+                }
             }
             catch (Exception ex)
             {
@@ -105,7 +122,7 @@ namespace BluetoothTest.ViewModels
                 if (IsConnected)
                 {
                     _reconnectCts?.Cancel();
-                    LightState = null; // in attesa della risposta di stato dall'ESP32
+                    LightState = null;
                 }
             }
             catch (Exception ex)
@@ -140,10 +157,7 @@ namespace BluetoothTest.ViewModels
                 if (!IsConnected) return;
                 await _bluetooth.SendAsync(new byte[] { (byte)'1' });
             }
-            catch (Exception ex)
-            {
-                LastError = ex.Message;
-            }
+            catch (Exception ex) { LastError = ex.Message; }
         }
 
         [RelayCommand]
@@ -155,13 +169,30 @@ namespace BluetoothTest.ViewModels
                 if (!IsConnected) return;
                 await _bluetooth.SendAsync(new byte[] { (byte)'0' });
             }
-            catch (Exception ex)
+            catch (Exception ex) { LastError = ex.Message; }
+        }
+
+        // ── Ricezione dati ───────────────────────────────────────────────────
+
+        private void OnDataReceived(object? sender, byte[] data)
+        {
+            var msg = Encoding.UTF8.GetString(data).Trim();
+            Dispatcher.UIThread.Post(() =>
             {
-                LastError = ex.Message;
-            }
+                if      (msg.Contains("OK:1")) { LightState = true;  LastError = ""; }
+                else if (msg.Contains("OK:0")) { LightState = false; LastError = ""; }
+            });
         }
 
         // ── Auto-riconnessione ───────────────────────────────────────────────
+
+        private void OnBluetoothDisconnected(object? sender, EventArgs e)
+        {
+            IsConnected = false;
+            LightState  = null;
+            LastError   = "Dispositivo disconnesso.";
+            StartAutoReconnect();
+        }
 
         private void StartAutoReconnect()
         {
@@ -181,7 +212,7 @@ namespace BluetoothTest.ViewModels
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
                     LastError = "Riconnessione in corso...";
-                    await LoadDevices();
+                    await Connect();
                 });
 
                 if (IsConnected) return;

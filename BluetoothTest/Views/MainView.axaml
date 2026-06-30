@@ -3,7 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:BluetoothTest.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="650"
+             xmlns:bt="using:BluetoothTest"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="700"
              x:Class="BluetoothTest.Views.MainView"
              x:DataType="vm:MainViewModel">
 
@@ -12,6 +13,7 @@
     </Design.DataContext>
 
     <UserControl.Styles>
+
         <Style Selector="Button.send">
             <Setter Property="CornerRadius" Value="24"/>
             <Setter Property="Width" Value="140"/>
@@ -24,6 +26,17 @@
         <Style Selector="Button.send:disabled /template/ ContentPresenter">
             <Setter Property="Opacity" Value="0.2"/>
         </Style>
+
+        <Style Selector="Button.ghost">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#252540"/>
+        </Style>
+
         <Style Selector="Button.reconnect">
             <Setter Property="Background" Value="#252540"/>
             <Setter Property="Foreground" Value="#7070A0"/>
@@ -38,33 +51,62 @@
         <Style Selector="Button.reconnect:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#3A3A55"/>
         </Style>
+
+        <Style Selector="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="CornerRadius" Value="10"/>
+        </Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#252540"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2D1B69"/>
+        </Style>
+
     </UserControl.Styles>
 
-    <Grid Background="#13131F" RowDefinitions="Auto,*,Auto,Auto">
+    <Grid Background="#13131F" RowDefinitions="Auto,Auto,*,Auto,Auto">
 
-        <!-- Header -->
-        <Border Grid.Row="0" Background="#1A1A2E" Padding="24,20">
+        <!-- ── Header ──────────────────────────────────────────────────────── -->
+        <Border Grid.Row="0" Background="#1A1A2E" Padding="24,18">
             <Grid ColumnDefinitions="*,Auto">
                 <StackPanel>
                     <TextBlock Text="Controllo Luci"
                                FontSize="22" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="ESP32-Luce"
-                               FontSize="12" Foreground="#5050A0" Margin="0,2,0,0"/>
+                    <!-- dispositivo target -->
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,3,0,0">
+                        <TextBlock Text="{Binding TargetDeviceName}"
+                                   FontSize="12" Foreground="#5050A0"
+                                   VerticalAlignment="Center"/>
+                        <Button Classes="ghost"
+                                Command="{Binding ToggleDevicePickerCommand}"
+                                CornerRadius="6" Padding="4,2">
+                            <Panel>
+                                <TextBlock Text="▲" FontSize="11" Foreground="#5050A0"
+                                           IsVisible="{Binding IsDevicePickerOpen}"/>
+                                <TextBlock Text="▼" FontSize="11" Foreground="#5050A0"
+                                           IsVisible="{Binding !IsDevicePickerOpen}"/>
+                            </Panel>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
 
-                <!-- Connesso -->
-                <Border Grid.Column="1" CornerRadius="20" Padding="14,7" VerticalAlignment="Center"
-                        Background="#0D2A1A" IsVisible="{Binding IsConnected}">
-                    <StackPanel Orientation="Horizontal" Spacing="7">
+                <!-- pill connessione -->
+                <Border Grid.Column="1" CornerRadius="20" Padding="12,6"
+                        VerticalAlignment="Center" Background="#0D2A1A"
+                        IsVisible="{Binding IsConnected}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
                         <Ellipse Width="8" Height="8" Fill="#22C55E" VerticalAlignment="Center"/>
                         <TextBlock Text="Connesso" FontSize="12" Foreground="#22C55E"
                                    FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
-                <!-- Non connesso -->
-                <Border Grid.Column="1" CornerRadius="20" Padding="14,7" VerticalAlignment="Center"
-                        Background="#1A1A2E" IsVisible="{Binding !IsConnected}">
-                    <StackPanel Orientation="Horizontal" Spacing="7">
+                <Border Grid.Column="1" CornerRadius="20" Padding="12,6"
+                        VerticalAlignment="Center" Background="#1A1A2E"
+                        IsVisible="{Binding !IsConnected}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
                         <Ellipse Width="8" Height="8" Fill="#505080" VerticalAlignment="Center"/>
                         <TextBlock Text="Non connesso" FontSize="12" Foreground="#505080" VerticalAlignment="Center"/>
                     </StackPanel>
@@ -72,85 +114,111 @@
             </Grid>
         </Border>
 
-        <!-- Main controls -->
-        <Grid Grid.Row="1" RowDefinitions="*,Auto,*">
+        <!-- ── Pannello selettore dispositivo (apribile) ────────────────────── -->
+        <Border Grid.Row="1"
+                Background="#151525"
+                IsVisible="{Binding IsDevicePickerOpen}"
+                Padding="16,12">
+            <StackPanel Spacing="8">
+                <TextBlock Text="SELEZIONA DISPOSITIVO"
+                           FontSize="10" FontWeight="SemiBold"
+                           Foreground="#404060" LetterSpacing="2"/>
+                <ListBox ItemsSource="{Binding Devices}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         MaxHeight="220">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="bt:BluetoothDeviceInfo">
+                            <Button Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).SelectDeviceCommand}"
+                                    CommandParameter="{Binding}"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    Padding="0" Cursor="Hand">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}"
+                                               FontWeight="SemiBold" Foreground="#D0D0F0"
+                                               FontSize="14"/>
+                                    <TextBlock Text="{Binding Address}"
+                                               FontSize="11" Foreground="#404060"
+                                               Margin="0,1,0,0"/>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Text="Nessun dispositivo accoppiato trovato."
+                           FontSize="12" Foreground="#404060" HorizontalAlignment="Center"
+                           Margin="0,8"
+                           IsVisible="{Binding !Devices.Count}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ── Controlli principali ─────────────────────────────────────────── -->
+        <Grid Grid.Row="2" RowDefinitions="*,Auto,*">
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Spacing="28">
 
                 <TextBlock Text="CONTROLLA LA LUCE"
-                           FontSize="11" FontWeight="SemiBold" Foreground="#404060"
-                           LetterSpacing="2" HorizontalAlignment="Center"/>
+                           FontSize="11" FontWeight="SemiBold"
+                           Foreground="#404060" LetterSpacing="2"
+                           HorizontalAlignment="Center"/>
 
                 <Grid ColumnDefinitions="Auto,40,Auto">
 
                     <!-- OFF -->
                     <StackPanel Spacing="10" HorizontalAlignment="Center">
-                        <!-- bordo attivo -->
-                        <Border CornerRadius="27" Padding="3"
-                                IsVisible="{Binding LightIsOff}">
+                        <Border CornerRadius="27" Padding="3" IsVisible="{Binding LightIsOff}">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
                                     <GradientStop Color="#1E4080" Offset="0"/>
                                     <GradientStop Color="#2D5A8E" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.Background>
-                            <Button Classes="send"
-                                    IsEnabled="{Binding IsConnected}"
-                                    Command="{Binding SendZeroCommand}"
-                                    Background="#0E1E35">
+                            <Button Classes="send" IsEnabled="{Binding IsConnected}"
+                                    Command="{Binding SendZeroCommand}" Background="#0E1E35">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
                                     <TextBlock Text="⏻" FontSize="38" Foreground="#60A5FA" HorizontalAlignment="Center"/>
                                     <TextBlock Text="OFF" FontSize="13" FontWeight="Bold" Foreground="#60A5FA" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
                         </Border>
-                        <!-- senza bordo -->
-                        <Button Classes="send"
-                                IsVisible="{Binding !LightIsOff}"
+                        <Button Classes="send" IsVisible="{Binding !LightIsOff}"
                                 IsEnabled="{Binding IsConnected}"
-                                Command="{Binding SendZeroCommand}"
-                                Background="#0E1E35">
+                                Command="{Binding SendZeroCommand}" Background="#0E1E35">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
                                 <TextBlock Text="⏻" FontSize="38" Foreground="#2D5A8E" HorizontalAlignment="Center"/>
                                 <TextBlock Text="OFF" FontSize="13" FontWeight="Bold" Foreground="#2D5A8E" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        <!-- pallino indicatore -->
                         <Ellipse Width="8" Height="8" HorizontalAlignment="Center"
                                  Fill="#60A5FA" IsVisible="{Binding LightIsOff}"/>
                         <Ellipse Width="8" Height="8" HorizontalAlignment="Center"
                                  Fill="Transparent" IsVisible="{Binding !LightIsOff}"/>
                     </StackPanel>
 
-                    <!-- Separatore -->
                     <Rectangle Grid.Column="1" Width="1" Fill="#252540" VerticalAlignment="Stretch" Margin="0,20"/>
 
                     <!-- ON -->
                     <StackPanel Grid.Column="2" Spacing="10" HorizontalAlignment="Center">
-                        <!-- bordo attivo -->
-                        <Border CornerRadius="27" Padding="3"
-                                IsVisible="{Binding LightIsOn}">
+                        <Border CornerRadius="27" Padding="3" IsVisible="{Binding LightIsOn}">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
                                     <GradientStop Color="#166534" Offset="0"/>
                                     <GradientStop Color="#22C55E" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.Background>
-                            <Button Classes="send"
-                                    IsEnabled="{Binding IsConnected}"
-                                    Command="{Binding SendOneCommand}"
-                                    Background="#1A3520">
+                            <Button Classes="send" IsEnabled="{Binding IsConnected}"
+                                    Command="{Binding SendOneCommand}" Background="#1A3520">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
                                     <TextBlock Text="⏻" FontSize="38" Foreground="#4ADE80" HorizontalAlignment="Center"/>
                                     <TextBlock Text="ON" FontSize="13" FontWeight="Bold" Foreground="#4ADE80" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
                         </Border>
-                        <!-- senza bordo -->
-                        <Button Classes="send"
-                                IsVisible="{Binding !LightIsOn}"
+                        <Button Classes="send" IsVisible="{Binding !LightIsOn}"
                                 IsEnabled="{Binding IsConnected}"
-                                Command="{Binding SendOneCommand}"
-                                Background="#1A3520">
+                                Command="{Binding SendOneCommand}" Background="#1A3520">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
                                 <TextBlock Text="⏻" FontSize="38" Foreground="#22C55E" HorizontalAlignment="Center"/>
                                 <TextBlock Text="ON" FontSize="13" FontWeight="Bold" Foreground="#22C55E" HorizontalAlignment="Center"/>
@@ -166,13 +234,11 @@
 
                 <!-- Stato sconosciuto -->
                 <TextBlock Text="In attesa dello stato..."
-                           FontSize="12" Foreground="#404060"
-                           HorizontalAlignment="Center"
-                           IsVisible="{Binding IsConnected}">
+                           FontSize="12" Foreground="#404060" HorizontalAlignment="Center">
                     <TextBlock.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Path="IsConnected"/>
-                            <Binding Path="LightIsOn" Converter="{x:Static BoolConverters.Not}"/>
+                            <Binding Path="LightIsOn"  Converter="{x:Static BoolConverters.Not}"/>
                             <Binding Path="LightIsOff" Converter="{x:Static BoolConverters.Not}"/>
                         </MultiBinding>
                     </TextBlock.IsVisible>
@@ -181,22 +247,20 @@
             </StackPanel>
         </Grid>
 
-        <!-- Reconnect button -->
-        <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,0,0,20">
+        <!-- ── Riconnetti ────────────────────────────────────────────────────── -->
+        <StackPanel Grid.Row="3" HorizontalAlignment="Center" Margin="0,0,0,20">
             <Button Classes="reconnect"
                     Content="↻  Riconnetti"
                     Command="{Binding LoadDevicesCommand}"/>
         </StackPanel>
 
-        <!-- Error area -->
-        <Border Grid.Row="3" Margin="20,0,20,24"
+        <!-- ── Area errore ───────────────────────────────────────────────────── -->
+        <Border Grid.Row="4" Margin="20,0,20,24"
                 IsVisible="{Binding LastError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
             <Border Background="#1A1A2E" CornerRadius="12" Padding="16,12">
                 <TextBlock Text="{Binding LastError}"
-                           Foreground="#9090C0"
-                           FontSize="12"
-                           TextWrapping="Wrap"
-                           HorizontalAlignment="Center"/>
+                           Foreground="#9090C0" FontSize="12"
+                           TextWrapping="Wrap" HorizontalAlignment="Center"/>
             </Border>
         </Border>
 
