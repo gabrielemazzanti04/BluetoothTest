@@ -10,6 +10,9 @@ namespace BluetoothTest.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
+        // Nome esatto del dispositivo a cui connettersi automaticamente (lascia vuoto per disabilitare)
+        private const string AutoConnectDeviceName = "ESP32-Luce";
+
         private readonly IBluetoothService _bluetooth;
         public ObservableCollection<BluetoothDeviceInfo> Devices { get; } = new();
 
@@ -46,7 +49,15 @@ namespace BluetoothTest.ViewModels
 
                 foreach (var d in devices)
                     Devices.Add(d);
-                SelectedDevice = Devices.FirstOrDefault();
+
+                var target = !string.IsNullOrEmpty(AutoConnectDeviceName)
+                    ? Devices.FirstOrDefault(d => d.Name.Contains(AutoConnectDeviceName, StringComparison.OrdinalIgnoreCase))
+                    : null;
+
+                SelectedDevice = target ?? Devices.FirstOrDefault();
+
+                if (target != null)
+                    await Connect();
             }
             catch (Exception ex)
             {

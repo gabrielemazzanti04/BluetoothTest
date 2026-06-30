@@ -11,7 +11,7 @@ using AndroidX.Core.Content;
 namespace BluetoothTest.Android
 {
     [Activity(
-        Label = "BluetoothTest.Android",
+        Label = "Controllo Luci",
         Theme = "@style/MyTheme.NoActionBar",
         Icon = "@drawable/icon",
         MainLauncher = true,

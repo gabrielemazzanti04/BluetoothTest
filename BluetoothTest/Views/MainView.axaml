@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:BluetoothTest.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="700"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="650"
              x:Class="BluetoothTest.Views.MainView"
              x:DataType="vm:MainViewModel">
 
@@ -12,242 +12,139 @@
     </Design.DataContext>
 
     <UserControl.Styles>
-        <!-- Card panel -->
-        <Style Selector="Border.card">
-            <Setter Property="Background" Value="#1E1E2E"/>
-            <Setter Property="CornerRadius" Value="16"/>
-            <Setter Property="Padding" Value="16"/>
-            <Setter Property="Margin" Value="0,6"/>
-        </Style>
-
-        <!-- Primary button -->
-        <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#7C3AED"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="16,10"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="14"/>
+        <Style Selector="Button.send">
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="Width" Value="140"/>
+            <Setter Property="Height" Value="140"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
         </Style>
-        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#6D28D9"/>
+        <Style Selector="Button.send:disabled /template/ ContentPresenter">
+            <Setter Property="Opacity" Value="0.25"/>
         </Style>
-        <Style Selector="Button.primary:disabled /template/ ContentPresenter">
-            <Setter Property="Background" Value="#3D2670"/>
-            <Setter Property="Opacity" Value="0.5"/>
-        </Style>
-
-        <!-- Danger button -->
-        <Style Selector="Button.danger">
-            <Setter Property="Background" Value="#DC2626"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="16,10"/>
+        <Style Selector="Button.reconnect">
+            <Setter Property="Background" Value="#252540"/>
+            <Setter Property="Foreground" Value="#7070A0"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#B91C1C"/>
-        </Style>
-
-        <!-- Secondary button -->
-        <Style Selector="Button.secondary">
-            <Setter Property="Background" Value="#2D2D3F"/>
-            <Setter Property="Foreground" Value="#A0A0C0"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="16,10"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="14"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="#3A3A55"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
-        <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
+        <Style Selector="Button.reconnect:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#3A3A55"/>
-        </Style>
-
-        <!-- Big send button -->
-        <Style Selector="Button.send">
-            <Setter Property="CornerRadius" Value="20"/>
-            <Setter Property="FontSize" Value="32"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Width" Value="110"/>
-            <Setter Property="Height" Value="110"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        <Style Selector="Button.send:disabled /template/ ContentPresenter">
-            <Setter Property="Opacity" Value="0.35"/>
-        </Style>
-
-        <!-- ListBox item style -->
-        <Style Selector="ListBoxItem">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="Margin" Value="0,2"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Foreground" Value="#C0C0D8"/>
-            <Setter Property="FontSize" Value="14"/>
-        </Style>
-        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-            <Setter Property="Background" Value="#2D1B69"/>
-            <Setter Property="TextBlock.Foreground" Value="White"/>
-        </Style>
-        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#252540"/>
         </Style>
     </UserControl.Styles>
 
-    <Grid Background="#13131F" RowDefinitions="Auto,*,Auto,Auto,Auto">
+    <Grid Background="#13131F" RowDefinitions="Auto,*,Auto,Auto">
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#1A1A2E" Padding="20,18,20,16">
-            <StackPanel>
-                <TextBlock Text="🔵 Bluetooth Controller"
-                           FontSize="20"
-                           FontWeight="Bold"
-                           Foreground="White"/>
-                <TextBlock Text="Gestione dispositivi Bluetooth"
-                           FontSize="12"
-                           Foreground="#6060A0"
-                           Margin="0,2,0,0"/>
-            </StackPanel>
-        </Border>
+        <Border Grid.Row="0" Background="#1A1A2E" Padding="24,20">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="Controllo Luci"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="White"/>
+                    <TextBlock Text="ESP32-Luce"
+                               FontSize="12"
+                               Foreground="#5050A0"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
 
-        <!-- Device list -->
-        <Border Grid.Row="1" Classes="card" Margin="16,12,16,0">
-            <Grid RowDefinitions="Auto,*">
-                <TextBlock Text="Dispositivi accoppiati"
-                           FontSize="12"
-                           FontWeight="SemiBold"
-                           Foreground="#6060A0"
-                           LetterSpacing="1"
-                           Margin="0,0,0,10"/>
-                <ScrollViewer Grid.Row="1" MaxHeight="260">
-                    <ListBox ItemsSource="{Binding Devices}"
-                             SelectedItem="{Binding SelectedDevice}"
-                             Background="Transparent"
-                             BorderThickness="0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Name}"
-                                               FontWeight="SemiBold"
-                                               Foreground="#E0E0F0"/>
-                                    <TextBlock Text="{Binding Address}"
-                                               FontSize="11"
-                                               Foreground="#505080"
-                                               Margin="0,1,0,0"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </ScrollViewer>
+                <!-- Status pill -->
+                <Border Grid.Column="1" CornerRadius="20" Padding="14,7" VerticalAlignment="Center">
+                    <!-- Connesso -->
+                    <Border.IsVisible>
+                        <Binding Path="IsConnected"/>
+                    </Border.IsVisible>
+                    <Border.Background>
+                        <SolidColorBrush Color="#0D2A1A"/>
+                    </Border.Background>
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <Ellipse Width="8" Height="8" Fill="#22C55E" VerticalAlignment="Center"/>
+                        <TextBlock Text="Connesso" FontSize="12" Foreground="#22C55E" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" CornerRadius="20" Padding="14,7" VerticalAlignment="Center"
+                        Background="#1A1A2E"
+                        IsVisible="{Binding !IsConnected}">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <Ellipse Width="8" Height="8" Fill="#505080" VerticalAlignment="Center"/>
+                        <TextBlock Text="Non connesso" FontSize="12" Foreground="#505080" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
 
-        <!-- Connection controls -->
-        <Border Grid.Row="2" Classes="card" Margin="16,8,16,0">
-            <StackPanel Spacing="10">
-                <TextBlock Text="CONNESSIONE"
+        <!-- Main controls -->
+        <Grid Grid.Row="1" RowDefinitions="*,Auto,*">
+
+            <!-- Bottoni ON/OFF -->
+            <StackPanel Grid.Row="1"
+                        HorizontalAlignment="Center"
+                        Spacing="32">
+
+                <TextBlock Text="CONTROLLA LA LUCE"
                            FontSize="11"
                            FontWeight="SemiBold"
-                           Foreground="#6060A0"
-                           LetterSpacing="1"/>
+                           Foreground="#404060"
+                           LetterSpacing="2"
+                           HorizontalAlignment="Center"/>
 
-                <!-- Status indicator -->
-                <Border CornerRadius="10" Padding="12,8" Background="#0D0D1A">
-                    <Panel>
-                        <!-- Connesso -->
-                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"
-                                    IsVisible="{Binding IsConnected}">
-                            <Ellipse Width="10" Height="10" Fill="#22C55E"/>
-                            <TextBlock Text="Connesso" FontSize="13" Foreground="#22C55E" FontWeight="SemiBold"/>
-                        </StackPanel>
-                        <!-- Non connesso -->
-                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"
-                                    IsVisible="{Binding !IsConnected}">
-                            <Ellipse Width="10" Height="10" Fill="#6060A0"/>
-                            <TextBlock Text="Non connesso" FontSize="13" Foreground="#6060A0"/>
-                        </StackPanel>
-                    </Panel>
-                </Border>
-
-                <Grid ColumnDefinitions="*,8,*,8,*">
-                    <Button Classes="secondary"
-                            Content="↻  Ricarica"
-                            Command="{Binding LoadDevicesCommand}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center"/>
-
-                    <Button Classes="primary"
-                            Grid.Column="2"
-                            Content="⚡ Connetti"
-                            Command="{Binding ConnectCommand}"
-                            IsEnabled="{Binding SelectedDevice, Converter={x:Static ObjectConverters.IsNotNull}}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center"/>
-
-                    <Button Classes="danger"
-                            Grid.Column="4"
-                            Content="✕  Disconnetti"
-                            Command="{Binding DisconnectCommand}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center"/>
-                </Grid>
-            </StackPanel>
-        </Border>
-
-        <!-- Send buttons -->
-        <Border Grid.Row="3" Classes="card" Margin="16,8,16,0">
-            <StackPanel Spacing="14">
-                <TextBlock Text="INVIA SEGNALE"
-                           FontSize="11"
-                           FontWeight="SemiBold"
-                           Foreground="#6060A0"
-                           LetterSpacing="1"/>
-                <Grid ColumnDefinitions="*,*">
+                <Grid ColumnDefinitions="Auto,40,Auto">
+                    <!-- OFF -->
                     <Button Classes="send"
-                            HorizontalAlignment="Center"
                             IsEnabled="{Binding IsConnected}"
                             Command="{Binding SendZeroCommand}"
-                            Background="#1E3A5F"
-                            Foreground="#60A5FA"
-                            ToolTip.Tip="Invia 0">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="0" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
-                            <TextBlock Text="OFF" FontSize="11" Foreground="#4080C0" HorizontalAlignment="Center"/>
+                            Background="#0E1E35"
+                            ToolTip.Tip="Spegni">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                            <TextBlock Text="⏻" FontSize="38" Foreground="#2D5A8E" HorizontalAlignment="Center"/>
+                            <TextBlock Text="OFF" FontSize="13" FontWeight="Bold" Foreground="#2D5A8E" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
+                    <!-- Separatore -->
+                    <Rectangle Grid.Column="1" Width="1" Fill="#252540" VerticalAlignment="Stretch" Margin="0,20"/>
+
+                    <!-- ON -->
                     <Button Classes="send"
-                            Grid.Column="1"
-                            HorizontalAlignment="Center"
+                            Grid.Column="2"
                             IsEnabled="{Binding IsConnected}"
                             Command="{Binding SendOneCommand}"
-                            Background="#1A3A1A"
-                            Foreground="#4ADE80"
-                            ToolTip.Tip="Invia 1">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="1" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
-                            <TextBlock Text="ON" FontSize="11" Foreground="#2D8040" HorizontalAlignment="Center"/>
+                            Background="#1A3520"
+                            ToolTip.Tip="Accendi">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                            <TextBlock Text="⏻" FontSize="38" Foreground="#22C55E" HorizontalAlignment="Center"/>
+                            <TextBlock Text="ON" FontSize="13" FontWeight="Bold" Foreground="#22C55E" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </Grid>
             </StackPanel>
-        </Border>
+        </Grid>
+
+        <!-- Reconnect button -->
+        <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,0,0,20" Spacing="10">
+            <Button Classes="reconnect"
+                    Content="↻  Riconnetti"
+                    Command="{Binding LoadDevicesCommand}"
+                    HorizontalAlignment="Center"/>
+        </StackPanel>
 
         <!-- Error area -->
-        <Border Grid.Row="4" Margin="16,6,16,16"
+        <Border Grid.Row="3" Margin="20,0,20,24"
                 IsVisible="{Binding LastError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <Border Background="#2D0A0A" CornerRadius="10" Padding="14,10">
+            <Border Background="#2D0A0A" CornerRadius="12" Padding="16,12">
                 <TextBlock Text="{Binding LastError}"
                            Foreground="#F87171"
                            FontSize="12"
-                           TextWrapping="Wrap"/>
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Center"/>
             </Border>
         </Border>
 
