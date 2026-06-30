@@ -24,7 +24,13 @@ namespace BluetoothTest.ViewModels
         public MainViewModel(IBluetoothService bluetoothService)
         {
             _bluetooth = bluetoothService;
-            LoadDevices();
+            _bluetooth.Disconnected += OnBluetoothDisconnected;
+        }
+
+        private void OnBluetoothDisconnected(object? sender, EventArgs e)
+        {
+            IsConnected = false;
+            LastError = "Dispositivo disconnesso.";
         }
 
         [RelayCommand]

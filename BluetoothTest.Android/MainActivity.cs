@@ -26,18 +26,37 @@ namespace BluetoothTest.Android
             {
                 var permissions = new[]
                 {
-                Manifest.Permission.BluetoothConnect,
-                Manifest.Permission.BluetoothScan
-            };
+                    Manifest.Permission.BluetoothConnect,
+                    Manifest.Permission.BluetoothScan
+                };
 
                 var missing = permissions
                     .Where(p => ContextCompat.CheckSelfPermission(this, p) != Permission.Granted)
                     .ToArray();
 
                 if (missing.Length > 0)
-                {
-                    ActivityCompat.RequestPermissions(this, missing, 100);
-                }
+                    ActivityCompat.RequestPermissions(this, missing, RequestBluetoothPermissions);
+            }
+        }
+
+        private const int RequestBluetoothPermissions = 100;
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+            if (requestCode != RequestBluetoothPermissions)
+                return;
+
+            bool allGranted = grantResults.Length > 0 &&
+                              grantResults.All(r => r == Permission.Granted);
+
+            if (!allGranted)
+            {
+                // Almeno un permesso negato: mostriamo un Toast e non carichiamo i dispositivi
+                global::Android.Widget.Toast
+                    .MakeText(this, "Permessi Bluetooth necessari per usare l'app.", global::Android.Widget.ToastLength.Long)!
+                    .Show();
             }
         }
     }
